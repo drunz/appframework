@@ -5,7 +5,7 @@
  * Optimizations and bug improvements by Intel
  * @copyright Intel
  */ (function ($) {
-    var HIDE_REFRESH_TIME = 75; // hide animation of pull2ref duration in ms
+    var HIDE_REFRESH_TIME = 300; // hide animation of pull2ref duration in ms
     var cache = [];
     var objId = function (obj) {
         if (!obj.afScrollerId) obj.afScrollerId = $.uuid();
@@ -243,15 +243,15 @@
                     if (orginalEl !== null) {
                         afEl = af(orginalEl);
                     } else {
-                        afEl = af("<div id='" + this.container.id + "_pulldown' class='afscroll_refresh' style='border-radius:.6em;border: 1px solid #2A2A2A;background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0,#666666),color-stop(1,#222222));background:#222222;margin:0px;height:60px;position:relative;text-align:center;line-height:60px;color:white;width:100%;'>" + this.refreshContent + "</div>");
+                        afEl = af("<div id='" + this.container.id + "_pulldown' class='afscroll_refresh'>" + this.refreshContent + "</div>");
                     }
                 } else {
                     afEl = af(this.refreshElement);
                 }
                 var el = afEl.get(0);
 
-                this.refreshContainer = af("<div style=\"overflow:hidden;width:100%;height:0;margin:0;padding:0;padding-left:5px;padding-right:5px;display:none;\"></div>");
-                $(this.el).prepend(this.refreshContainer.append(el, 'top'));
+                this.refreshContainer = af("<div style=\"overflow:hidden;width:100%;height:0;margin:0;padding:0;display:none;\"></div>");
+                $(this.el).prepend(this.refreshContainer.append(el, ''));
                 this.refreshContainer = this.refreshContainer[0];
             },
             fireRefreshRelease: function (triggered, allowHide) {
@@ -860,7 +860,8 @@
                 this.preventPullToRefresh = false;
             } else if (scrollInfo.top < 0) {
                 this.preventPullToRefresh = true;
-                if (this.refresh) this.refreshContainer.style.overflow = 'hidden';
+                // if (this.refresh) this.refreshContainer.style.overflow = 'hidden';
+                // FIX: Weird glitch whens crolling. What is this actually for?
             }
 
             //set target
@@ -891,7 +892,7 @@
             this.lastScrollInfo = scrollInfo;
             this.hasMoved = false;
 
-           if(this.elementInfo.maxTop==0&&this.elementInfo.maxLeft==0)
+            if(this.elementInfo.maxTop==0&&this.elementInfo.maxLeft==0)
                 this.currentScrollingObject=null;
             else
                 this.scrollerMoveCSS(this.lastScrollInfo, 0);
@@ -1080,13 +1081,12 @@
                 }
             }
 
-            if (this.infinite && !this.infiniteTriggered) {
-                if ((Math.abs(this.lastScrollInfo.top) >= (this.el.clientHeight - this.container.clientHeight))) {
-                    this.infiniteTriggered = true;
-                    $.trigger(this, "infinite-scroll");
-                }
-            }
-
+            // if (this.infinite && !this.infiniteTriggered) {
+            //     if ((Math.abs(this.lastScrollInfo.top) >= (this.el.clientHeight - this.container.clientHeight))) {
+            //         this.infiniteTriggered = true;
+            //         $.trigger(this, "infinite-scroll");
+            //     }
+            // }
         };
 
        
@@ -1240,8 +1240,7 @@
 
             if (this.elementInfo.hasHorScroll) this.checkXboundary(scrollInfo);
 
-
-            var triggered = !this.preventPullToRefresh && (scrollInfo.top > this.refreshHeight || scrollInfo.y > this.refreshHeight);
+            var triggered = !this.preventPullToRefresh && (scrollInfo.top > this.refreshHeight); // || scrollInfo.y > this.refreshHeight);
             this.fireRefreshRelease(triggered, scrollInfo.top > 0);
 
             //refresh hang in
@@ -1278,7 +1277,7 @@
             this.setHScrollBar(scrollInfo, scrollInfo.duration, "cubic-bezier(0.33,0.66,0.66,1)");
             this.setFinishCalback(scrollInfo.duration);
             if (this.infinite && !this.infiniteTriggered) {
-                if ((Math.abs(scrollInfo.y) >= (this.el.clientHeight - this.container.clientHeight))) {
+                if ((Math.abs(scrollInfo.top) >= (this.el.clientHeight - this.container.clientHeight))) {
                     this.infiniteTriggered = true;
                     $.trigger(this, "infinite-scroll");
                 }
